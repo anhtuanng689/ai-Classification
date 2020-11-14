@@ -78,7 +78,96 @@ def enhancedFeatureExtractorDigit(datum):
     features =  basicFeatureExtractorDigit(datum)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    for y in range(DIGIT_DATUM_HEIGHT):
+        count = 0
+        for x in range(DIGIT_DATUM_WIDTH):
+            if features[(x, y)] == 1:
+                count += 1
+
+        for i in range(DIGIT_DATUM_WIDTH):
+            if i == count:
+                features["y"+str(y)+"-"+str(i)] = 1
+            else:
+                features["y"+str(y)+"-"+str(i)] = 0
+    # tinh so pixel o nua tren, nua duoi, nua trai, nua phai
+    top = 0
+    bottom = 0
+    left = 0
+    right = 0
+    for y in range(DIGIT_DATUM_HEIGHT):
+        for x in range(DIGIT_DATUM_WIDTH):
+            if features[(x, y)] == 1:
+                if y < DIGIT_DATUM_HEIGHT / 2:
+                    top += 1
+                else:
+                    bottom += 1
+
+                if x < DIGIT_DATUM_WIDTH / 2:
+                    left += 1
+                else:
+                    right += 1
+
+    if top > bottom:
+        features["top"] = 1
+        features["bottom"] = 0
+    else:
+        features["top"] = 0
+        features["bottom"] = 1
+
+    if left > right:
+        features["left"] = 1
+        features["right"] = 0
+    else:
+        features["left"] = 0
+        features["right"] = 1
+
+    # kiem tra neu co hinh tron
+    for y in range(DIGIT_DATUM_HEIGHT)[2:][:-2]:
+        for x in range(DIGIT_DATUM_WIDTH)[2:][:-2]:
+            if features[(x, y)] == 0:
+                n = False
+                e = False
+                s = False
+                w = False
+                ne = False
+                se = False
+                sw = False
+                nw = False
+                for x1 in range(DIGIT_DATUM_WIDTH)[x+1:]:
+                    if features[(x1, y)] == 1:
+                        e = True
+                        break
+                for x1 in range(DIGIT_DATUM_WIDTH)[:x]:
+                    if features[(x1, y)] == 1:
+                        w = True
+                        break
+                for y1 in range(DIGIT_DATUM_HEIGHT)[y+1:]:
+                    if features[(x, y1)] == 1:
+                        s = True
+                        break
+                for y1 in range(DIGIT_DATUM_HEIGHT)[:y]:
+                    if features[(x, y1)] == 1:
+                        n = True
+                        break
+                for i in range(max(DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT) / 2):
+                    if ne and se and sw and nw:
+                        break
+                    if features[(x+i, y+i)] == 1:
+                        se = True
+                    if features[(x-i, y+i)] == 1:
+                        sw = True
+                    if features[(x+i, y-i)] == 1:
+                        ne = True
+                    if features[(x-i, y-i)] == 1:
+                        nw = True
+
+                if n and e and s and w and ne and se and sw and nw:
+                    features["circle"] = 1
+                    break
+                else:
+                    features["circle"] = 0
+        if features["circle"] == 1:
+            break
 
     return features
 
@@ -124,9 +213,36 @@ def enhancedPacmanFeatures(state, action):
     """
     features = util.Counter()
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    return features
+    successor = state.generateSuccessor(0, action) # Tao successor o vi tri hien tai
+    pacmanPosition = successor.getPacmanPosition()
+    closestFood = 0
+    foodList = successor.getFood().asList() # Tao list thuc an
+    closestGhost = 0
+    ghostPosition = successor.getGhostPositions() # Tim kiem vi tri cua ma
 
+    if not foodList:
+        pass
+    else: # Khoang cach nho nhat toi thuc an
+        closestFood = min([util.manhattanDistance(i, pacmanPosition) for i in foodList])
+    if closestFood:
+        closestFood = 9.0 / closestFood
+    else:
+        closestFood
+    features['closestFood'] = closestFood # Dat ten cho thuc an gan nhat
+        
+    if not ghostPosition:
+        pass
+    else: # Khoang cach nho nhat toi ma
+        closestGhost = min(util.manhattanDistance(i, pacmanPosition) for i in ghostPosition)
+    if closestGhost:
+        closestGhost = 9.0 / closestGhost
+    else:
+        closestGhost   
+    features['closestGhost'] = closestGhost # Dat ten cho ma gan nhat
+    
+    features['remainingFood'] = successor.getNumFood() # Dat ten cho thuc an con lai
+
+    return features
 
 def contestFeatureExtractorDigit(datum):
     """

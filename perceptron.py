@@ -51,11 +51,18 @@ class PerceptronClassifier:
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
+        label = util.Counter()
+
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
-                "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                for j in self.legalLabels: # Vong lap qua cac nhan
+                    label[j] = trainingData[i].__mul__(self.weights[j]) # Nhan cua du lieu training
+                if (trainingLabels[i] == label.argMax()):
+                    pass
+                else: # Cap nhat vector weight cua nhan
+                    self.weights[trainingLabels[i]].__radd__(trainingData[i])
+                    self.weights[label.argMax()].__sub__(trainingData[i])       
 
     def classify(self, data ):
         """
@@ -80,6 +87,6 @@ class PerceptronClassifier:
         featuresWeights = []
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        featuresWeights = self.weights[label].values()
 
         return featuresWeights
